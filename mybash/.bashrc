@@ -1,6 +1,9 @@
 #!/bin/bash
 iatest=$(expr index "$-" i)
-
+cd() {
+	builtin cd "$@"
+	ll
+}
 #######################################################
 # SOURCED ALIAS'S AND SCRIPTS BY zachbrowne.me
 #######################################################
@@ -135,6 +138,7 @@ alias svi='sudo vi'
 alias vis='nvim "+set si"'
 
 # Change directory aliases
+
 alias home='cd ~'
 alias cd..='cd ..'
 alias ..='cd ..'
@@ -213,6 +217,7 @@ alias ungz='tar -xvzf'
 
 # Show all logs in /var/log
 alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e's/:$//g' | grep -v '[0-9]$' | xargs tail -f"
+alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e's/:$//g' | grep -v '[0-9]$' | xargs tail -f"
 
 # SHA1
 alias sha1='openssl sha1'
@@ -227,6 +232,16 @@ alias kssh="kitty +kitten ssh"
 # SPECIAL FUNCTIONS
 #######################################################
 
+# ls after cd
+cdl() {
+	if [ "$#" = 0 ]; then
+		cd ~ && ls
+	elif [ -d "$@" ]; then
+		cd "$@" && ls
+	else
+		echo "$@" directory not found!!!
+	fi
+}
 # Use the best version of pico installed
 edit() {
 	if [ "$(type -t jpico)" = "file" ]; then
@@ -358,49 +373,37 @@ up() {
 # }
 
 # Returns the last 2 fields of the working directory
-pwdtail() {
-	pwd | awk -F/ '{nlast = NF -1;print $nlast"/"$NF}'
-}
+# Then test against SUSE (must be after Redhat,
+# I've seen rc.status on Ubuntu I think? TODO: Recheck that)
 
-# Show the current distribution
-distribution() {
-	local dtype
-	# Assume unknown
-	dtype="unknown"
+#cancellato_per_basglio_vedi_git(){
+#
+#elif [ -r /etc/rc.status ]; then
+#		source /etc/rc.status
+#		[ zz$(type -t rc_reset 2>/dev/null) == "zzfunction" ] && dtype="suse"
+#
+#	# Then test against Debian, Ubuntu and friends
+#	elif [ -r /lib/lsb/init-functions ]; then
+#		source /lib/lsb/init-functions
+#		[ zz$(type -t log_begin_msg 2>/dev/null) == "zzfunction" ] && dtype="debian"
+#
+#	# Then test against Gentoo
+#	elif [ -r /etc/init.d/functions.sh ]; then
+#		source /etc/init.d/functions.sh
+#		[ zz$(type -t ebegin 2>/dev/null) == "zzfunction" ] && dtype="gentoo"
+#
+#	# For Mandriva we currently just test if /etc/mandriva-release exists
+#	# and isn't empty (TODO: Find a better way :)
+#	elif [ -s /etc/mandriva-release ]; then
+#		dtype="mandriva"
+#
+#	# For Slackware we currently just test if /etc/slackware-version exists
+#	elif [ -s /etc/slackware-version ]; then
+#		dtype="slackware"
 
-	# First test against Fedora / RHEL / CentOS / generic Redhat derivative
-	if [ -r /etc/rc.d/init.d/functions ]; then
-		source /etc/rc.d/init.d/functions
-		[ zz$(type -t passed 2>/dev/null) == "zzfunction" ] && dtype="redhat"
-
-	# Then test against SUSE (must be after Redhat,
-	# I've seen rc.status on Ubuntu I think? TODO: Recheck that)
-	elif [ -r /etc/rc.status ]; then
-		source /etc/rc.status
-		[ zz$(type -t rc_reset 2>/dev/null) == "zzfunction" ] && dtype="suse"
-
-	# Then test against Debian, Ubuntu and friends
-	elif [ -r /lib/lsb/init-functions ]; then
-		source /lib/lsb/init-functions
-		[ zz$(type -t log_begin_msg 2>/dev/null) == "zzfunction" ] && dtype="debian"
-
-	# Then test against Gentoo
-	elif [ -r /etc/init.d/functions.sh ]; then
-		source /etc/init.d/functions.sh
-		[ zz$(type -t ebegin 2>/dev/null) == "zzfunction" ] && dtype="gentoo"
-
-	# For Mandriva we currently just test if /etc/mandriva-release exists
-	# and isn't empty (TODO: Find a better way :)
-	elif [ -s /etc/mandriva-release ]; then
-		dtype="mandriva"
-
-	# For Slackware we currently just test if /etc/slackware-version exists
-	elif [ -s /etc/slackware-version ]; then
-		dtype="slackware"
-
-	fi
-	echo $dtype
-}
+#	fi
+#	echo $dtype
+#}
 
 # Show the current version of the operating system
 ver() {
@@ -635,7 +638,24 @@ _zoxide_hook() {
 		_ZO_PWD="${PWD}"
 		zoxide add "$(pwd -L)"
 	fi
+	if [ -z "${_ZO_PWD}" ]; then
+		_ZO_PWD="${PWD}"
+	elif [ "${_ZO_PWD}" != "${PWD}" ]; then
+		_ZO_PWD="${PWD}"
+		zoxide add "$(pwd -L)"
+	fi
 }
+
+# CACELLATA PER SBAGLIO VEDI GIT
+#if [ -z "${_ZO_PWD}" ]; then
+#	if [ -z "${_ZO_PWD}" ]; then
+#	if [ -z "${_ZO_PWD}" ]; then
+#		_ZO_PWD="${PWD}"
+#	elif [ "${_ZO_PWD}" != "${PWD}" ]; then
+#		_ZO_PWD="${PWD}"
+#		zoxide add "$(pwd -L)"
+#	fi
+#}
 
 case "$PROMPT_COMMAND" in
 *_zoxide_hook*) ;;
