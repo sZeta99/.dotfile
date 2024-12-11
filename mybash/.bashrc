@@ -1,9 +1,9 @@
 #!/bin/bash
+
+#make the caps an escape
+setxkbmap -option caps:escape
+
 iatest=$(expr index "$-" i)
-cd() {
-	builtin cd "$@"
-	ll
-}
 #######################################################
 # SOURCED ALIAS'S AND SCRIPTS BY zachbrowne.me
 #######################################################
@@ -59,7 +59,7 @@ alias spico='sedit'
 alias nano='edit'
 alias snano='sedit'
 alias vim='nvim'
-
+alias top='btop'
 # Replace batcat with cat on Fedora as batcat is not available as a RPM in any form
 if command -v lsb_release >/dev/null; then
 	DISTRIBUTION=$(lsb_release -si)
@@ -231,17 +231,11 @@ alias kssh="kitty +kitten ssh"
 #######################################################
 # SPECIAL FUNCTIONS
 #######################################################
-
-# ls after cd
-cdl() {
-	if [ "$#" = 0 ]; then
-		cd ~ && ls
-	elif [ -d "$@" ]; then
-		cd "$@" && ls
-	else
-		echo "$@" directory not found!!!
-	fi
+cd() {
+	builtin cd "$@"
+	ll
 }
+
 # Use the best version of pico installed
 edit() {
 	if [ "$(type -t jpico)" = "file" ]; then
@@ -361,16 +355,6 @@ up() {
 	fi
 	cd $d
 }
-
-#Automatically do an ls after each cd
-# cd ()
-# {
-# 	if [ -n "$1" ]; then
-# 		builtin cd "$@" && ls
-# 	else
-# 		builtin cd ~ && ls
-# 	fi
-# }
 
 # Returns the last 2 fields of the working directory
 # Then test against SUSE (must be after Redhat,
@@ -685,3 +669,19 @@ else
 fi
 alias config='/usr/bin/git --git-dir=/home/noir/.dotfile/ --work-tree=/home/noir'
 alias bashly='docker run --rm -it --user $(id -u):$(id -g) --volume "$PWD:/app" dannyben/bashly'
+alias noir-nvim='NVIM_APPNAME="noir-nvim" nvim'
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/noir/anaconda3/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
+if [ $? -eq 0 ]; then
+	eval "$__conda_setup"
+else
+	if [ -f "/home/noir/anaconda3/etc/profile.d/conda.sh" ]; then
+		. "/home/noir/anaconda3/etc/profile.d/conda.sh"
+	else
+		export PATH="/home/noir/anaconda3/bin:$PATH"
+	fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
